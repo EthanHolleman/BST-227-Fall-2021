@@ -1,0 +1,111 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}	% Para caracteres en español
+\usepackage{amsmath,amsthm,amsfonts,amssymb,amscd}
+\usepackage{multirow,booktabs}
+\usepackage[table]{xcolor}
+\usepackage{fullpage}
+\usepackage{lastpage}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{mathrsfs}
+\usepackage{wrapfig}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{setspace}
+\usepackage{calc}
+\usepackage{multicol}
+\usepackage{cancel}
+\usepackage[T1]{fontenc} 
+%\usepackage[retainorgcmds]{IEEEtrantools}
+\usepackage[margin=3cm]{geometry}
+\usepackage{amsmath}
+\newlength{\tabcont}
+\setlength{\parindent}{0.0in}
+\setlength{\parskip}{0.05in}
+\usepackage{empheq}
+\usepackage{framed}
+\usepackage[most]{tcolorbox}
+\usepackage{xcolor}
+\colorlet{shadecolor}{orange!15}
+\parindent 0in
+\parskip 12pt
+\usepackage[T1]{fontenc}
+
+ \renewcommand{\familydefault}{\sfdefault}
+\geometry{margin=1in, headsep=0.25in}
+\theoremstyle{definition}
+
+
+\usepackage{graphicx}
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	filecolor=magenta,      
+	urlcolor=cyan,
+}
+
+\begin{document}
+\title{
+	Assignment 1}
+
+\author{Ethan Holleman}
+\maketitle
+
+\section{Part 1}
+
+\subsection{Definitions}
+
+\begin{itemize}
+	\item $i$: Index over nucleotide sequences.
+	\item $P$: Length of kmers to consider in the model.
+	\item $m$: Indexes over all kmers of a given nucleotide sequence.
+	\item $j$: Indexes over nucleotides of a given kmer $m$.
+	\item $k$: Indexes over nucleotides (A, T, G, C).
+	\item $l$: Indexes over models where 0 indicates model cooresponding to transcription factor bindind motif (foreground) and 1 indicates non-binding region (background).
+	\item $X_{i,m,j,k}$: indicator variable that equals 1 if nucleotide $j$ of kmer $m$ of sequence $i$ is equal to base $k$ and equals 0 otherwise.
+	\item $C_{i, m, l}$: Indicator variable that will equal 1 if kmer $m$ of sequence $i$ was drawn from model $l$ and otherwise equals 0. 
+	\item $\boldsymbol{X}$: The set of all $X_{i,m,j,k}$.
+	\item $\boldsymbol{C}$: The set of all $C_{i, m, l}$.
+	\item $P(C_{i,m,l}=1) = \lambda_{l}$ where $l$ is either 0 or 1 indicating foreground or background. 
+	\item $P(X_{i,m,j,k} = 1 | C_{i,m,l}=1) = \psi^{(l)}_{j,k}$, where
+	$\sum_{k}\psi^{(l)}_{j,k}=1$
+	\subitem This should define two 4 by $P$ matries where each row sums to 1 and represents the probibility of observing each nucleotide at a given position $j$ of a kmer given kmer was selected from model $l$.
+	\item The model parameters are denoted as $\theta$ = $\{\lambda_{l}, \psi^{(l)}_{j,k}\}$
+\end{itemize}
+
+\subsection{Complete log likelihood}
+
+\begin{equation}
+	Q(\theta | \boldsymbol{X}, \boldsymbol{C}) = \textrm{log}(P(\boldsymbol{X}, \boldsymbol{C} | \theta))
+\end{equation}
+
+\begin{equation}
+	= \textrm{log} \prod_{i}\prod_{m}P(X_{i,m}, C_{i, m} | \theta)
+\end{equation}
+
+\begin{equation}
+= \textrm{log} \prod_{i}\prod_{m}(\prod_{j}\prod_{k}\prod_{l}[P(C_{i,m,l}=1|\theta)P(X_{i,m,j,k}=1|C_{i,m,l}=1, \theta)]^{X_{i, m, j, k}C_{i, m, l}})
+\end{equation}
+
+\begin{equation}
+= \textrm{log} \prod_{i}\prod_{m}(\prod_{j}\prod_{k}\prod_{l}[\lambda_{l}\psi_{j, k}^{(l)}])
+\end{equation}
+
+\begin{equation}
+= \sum_{i}\sum_{m}\sum_{j}\sum_{k}\sum_{l}X_{i,m,j,k}C_{i, m, l}\textrm{log}[\lambda_{l}\psi_{j, k}^{(l)}]
+\end{equation}
+
+\begin{equation}
+= \sum_{i}\sum_{m}\sum_{j}\sum_{k}\sum_{l}X_{i,m,j,k}C_{i, m, l} \textrm{log}\lambda_{l} + \sum_{i}\sum_{m}\sum_{j}\sum_{k}\sum_{l}X_{i,m,j,k}C_{i, m, l}\textrm{log}\psi_{j, k}^{(l)}
+\end{equation}
+
+
+
+
+
+
+
+\end{document}
+
