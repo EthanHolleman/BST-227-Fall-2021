@@ -58,21 +58,20 @@
 \subsection{Definitions}
 
 \begin{itemize}
-	\item $i$: Index over nucleotide sequences.
-	\item $P$: Length of kmers to consider in the model.
-	\item $m$: Indexes over all kmers of a given nucleotide sequence.
-	\item $j$: Indexes over nucleotides of a given kmer $m$.
+	\item $i$: Index over nucleotide (input) sequences.
+	\item $P$: Length of motif to consider in the model.
+	\item $j$: Indexes over start positions of all possible motifs in a given sequence $i$ of length $L$ assuming all sequences have length $L$. $0 \leq j \leq L - P+1$
+	\item $m$: Indexes of each nucleotide of motif $j$ of sequence $i$. $0 \leq m \leq P$.
+	\item $l$: Indexes over models where 1 indicates model corresponding to transcription factor binding motif (foreground) and 0 indicates non-binding region (background).
 	\item $k$: Indexes over nucleotides (A, T, G, C).
-	\item $l$: Indexes over models where 0 indicates model cooresponding to transcription factor bindind motif (foreground) and 1 indicates non-binding region (background).
-	\item $X_{i,m,j,k}$: indicator variable that equals 1 if nucleotide $j$ of kmer $m$ of sequence $i$ is equal to base $k$ and equals 0 otherwise.
-	\item $C_{i, m, l}$: Indicator variable that will equal 1 if kmer $m$ of sequence $i$ was drawn from model $l$ and otherwise equals 0. 
-	\item $\boldsymbol{X}$: The set of all $X_{i,m,j,k}$.
-	\item $\boldsymbol{C}$: The set of all $C_{i, m, l}$.
-	\item $P(C_{i,m,l}=1) = \lambda_{l}$ where $l$ is either 0 or 1 indicating foreground or background. 
-	\item $P(X_{i,m,j,k} = 1 | C_{i,m,l}=1) = \psi^{(l)}_{j,k}$, where
-	$\sum_{k}\psi^{(l)}_{j,k}=1$
-	\subitem This should define two 4 by $P$ matries where each row sums to 1 and represents the probibility of observing each nucleotide at a given position $j$ of a kmer given kmer was selected from model $l$.
-	\item The model parameters are denoted as $\theta$ = $\{\lambda_{l}, \psi^{(l)}_{j,k}\}$
+	\item $X_{i,j,m,k}$: Indicator variable in which $X_{i,j,m,k}=1$ if base $m$ of the motif beginning at position $j$ of sequence $i$ is equal to nucleotide $k$ and is 0 otherwise.
+	\item $C_{i}$: Vector of motif start positions for each sequence $i$. If $C_{i} = j$ then then motif $j$ is the transcription factor binding site.
+	\subitem We use the indicator variable $C_{i,j}=1$ to represent when $C_{i} = j$.
+	\item $P(C_{i,j} = l) = \lambda_{j}$ and $0 \leq \lambda_{j} \leq 1$.
+	\item $P(X_{i,j,m,k}=l | C_{i,j}=l) = \psi_{k, m}^{(l)}$ where $\sum_{k}\psi^{(l)}_{k ,m}=1$
+	\item $\boldsymbol{X}$: The set of all $X_{i,j,m,k}$.
+	\item $\boldsymbol{C}$: The set of all $C_{i}$.
+	\item The set of all model parameters is denoted as $\boldsymbol{\theta} = \{\lambda_{j}, \psi^{(l)}_{k ,m}\}$
 \end{itemize}
 
 \subsection{Complete log likelihood}
@@ -82,24 +81,44 @@
 \end{equation}
 
 \begin{equation}
-	= \textrm{log} \prod_{i}\prod_{m}P(X_{i,m}, C_{i, m} | \theta)
+	= \textrm{log} \prod_{i}\prod_{j}P(X_{i,j}, C_{i,j} | \theta)
 \end{equation}
 
 \begin{equation}
-= \textrm{log} \prod_{i}\prod_{m}(\prod_{j}\prod_{k}\prod_{l}[P(C_{i,m,l}=1|\theta)P(X_{i,m,j,k}=1|C_{i,m,l}=1, \theta)]^{X_{i, m, j, k}C_{i, m, l}})
+	= \textrm{log}\prod_{i}\prod_{j} (\prod_{m}\prod_{k}\prod_{l}[P(X_{i,j,m,k}=1 | C_{i, j}=l, \theta)P(C_{i, j} = l | \theta)]^{X_{i,j,m,k} C_{i, j}})
 \end{equation}
 
 \begin{equation}
-= \textrm{log} \prod_{i}\prod_{m}(\prod_{j}\prod_{k}\prod_{l}[\lambda_{l}\psi_{j, k}^{(l)}])
+= \textrm{log} \prod_{i} \prod_{j} (\prod_{m} \prod_{k}\prod_{l}[\lambda_{j} \psi_{k, m}^{(l)}])^{X_{i,j,m,k} C_{i, j}}
 \end{equation}
 
 \begin{equation}
-= \sum_{i}\sum_{m}\sum_{j}\sum_{k}\sum_{l}X_{i,m,j,k}C_{i, m, l}\textrm{log}[\lambda_{l}\psi_{j, k}^{(l)}]
+	=\sum_{i} \sum_{j} \sum_{m} \sum_{k} \sum_{l} X_{i,j,m,k} C_{i,j} \textrm{log}[\psi_{k, m}^{(l)}]
 \end{equation}
 
 \begin{equation}
-= \sum_{i}\sum_{m}\sum_{j}\sum_{k}\sum_{l}X_{i,m,j,k}C_{i, m, l} \textrm{log}\lambda_{l} + \sum_{i}\sum_{m}\sum_{j}\sum_{k}\sum_{l}X_{i,m,j,k}C_{i, m, l}\textrm{log}\psi_{j, k}^{(l)}
+=\sum_{i} \sum_{j} \sum_{m} \sum_{k} \sum_{l} X_{i,j,m,k} C_{i,j} \textrm{log}[\psi_{k, m}^{(l)}]
 \end{equation}
+
+\begin{equation}
+=\sum_{i} \sum_{j} \sum_{m} \sum_{k} \sum_{l} X_{i,j,m,k} C_{i,j} \textrm{log} \lambda_{j} + \sum_{i} \sum_{j} \sum_{m} \sum_{k} \sum_{l} X_{i,j,m,k} C_{i,j} \textrm{log} \psi_{k, m}^{(l)}
+\end{equation}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -108,4 +127,3 @@
 
 
 \end{document}
-
