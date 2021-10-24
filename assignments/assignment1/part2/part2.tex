@@ -1,0 +1,175 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}	% Para caracteres en español
+\usepackage{amsmath,amsthm,amsfonts,amssymb,amscd}
+\usepackage{multirow,booktabs}
+\usepackage[table]{xcolor}
+\usepackage{fullpage}
+\usepackage{lastpage}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{mathrsfs}
+\usepackage{wrapfig}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{setspace}
+\usepackage{calc}
+\usepackage{multicol}
+\usepackage{cancel}
+\usepackage[T1]{fontenc} 
+%\usepackage[retainorgcmds]{IEEEtrantools}
+\usepackage[margin=3cm]{geometry}
+\usepackage{amsmath}
+\newlength{\tabcont}
+\setlength{\parindent}{0.0in}
+\setlength{\parskip}{0.05in}
+\usepackage{empheq}
+\usepackage{framed}
+\usepackage[most]{tcolorbox}
+\usepackage{xcolor}
+\colorlet{shadecolor}{orange!15}
+\parindent 0in
+\parskip 12pt
+\usepackage[T1]{fontenc}
+
+ \renewcommand{\familydefault}{\sfdefault}
+\geometry{margin=1in, headsep=0.25in}
+\theoremstyle{definition}
+
+
+\usepackage{graphicx}
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	filecolor=magenta,      
+	urlcolor=cyan,
+}
+
+\begin{document}
+\title{
+	Assignment 1}
+
+\author{Ethan Holleman}
+\maketitle
+
+\section{Part 2}
+
+
+\begin{equation}
+	\textrm{ln}P(X, C | \boldsymbol{\theta}) = \sum_{i} \sum_{j} C_{i, j} \textrm{ln}\lambda_{j} + \sum_{i}\sum_{j}\sum_{p}\sum_{k} X_{i,j,p}[C_{i,j}\textrm{ln} \psi^{(1)}_{p, k} + (1 - C_{i,j})\textrm{ln}\psi^{(0)}_{p, k}]
+\end{equation}
+
+\subsection{E step}
+
+
+\begin{equation}
+	P(\boldsymbol{C} | \boldsymbol{X}, \boldsymbol{\theta}) = \frac{P(\boldsymbol{X}, \boldsymbol{C} | \boldsymbol{\theta})}{P(\boldsymbol{X} | \boldsymbol{\theta})}
+\end{equation}
+
+Product individual posteriors is proportional to posterior over all latent variables.
+
+\begin{equation}
+P(\boldsymbol{C} | \boldsymbol{X}, \boldsymbol{\theta}) \propto
+ \prod_{i} \prod_{j} \prod_{p}P(C_{i, j} | X_{i, j, p}, \boldsymbol{\theta})
+\end{equation}
+
+Compute individual posteriors.
+
+\begin{equation}
+	P(C_{i, j} | X_{i, j, p}) = \frac{P(X_{i,j,p} | C_{i,j}, \boldsymbol{\theta}) P(X_{i, j} | \boldsymbol{\theta})}{P(X_{i,j,p} | \boldsymbol{\theta})}
+\end{equation}
+
+$P(E, F | G) = P(E | F, G) P(F | G)$
+
+\begin{equation}
+P(C_{i, j} | X_{i, j, p}) = \frac{P(X_{i,j,p}, C_{i, j} | \boldsymbol{\theta})}{P(X_{i,j,p} | \boldsymbol{\theta})}
+\end{equation}
+
+\begin{equation}
+P(C_{i, j} | X_{i, j, p}) = \frac{ \sum_{p} \sum_{k} P(C_{i, j} = 1 | \boldsymbol{\theta})P(X_{i, j, p} = k | C_{i, j}, \boldsymbol{\theta})}{P(X_{i,j,p} | \boldsymbol{\theta})}
+\end{equation}
+
+How to rewrite $P(X_{i,j,p} | \boldsymbol{\theta})$ and does the numerator make any sense at all?
+
+
+\subsection{M step}
+
+\begin{equation}
+	\boldsymbol{E}_{q}[\textrm{log} P(\boldsymbol{X}, \boldsymbol{C} | \boldsymbol{\theta})] =  \sum_{i} \sum_{j} C_{i, j} \textrm{ln}\lambda_{j} + \sum_{i}\sum_{j}\sum_{p}\sum_{k} X_{i,j,p}[C_{i,j}\textrm{ln} \psi^{(1)}_{p, k} + (1 - C_{i,j})\textrm{ln}\psi^{(0)}_{p, k}]
+\end{equation}
+
+\begin{equation}
+=  \sum_{i} \sum_{j} \boldsymbol{E}_{q} [C_{i, j} \textrm{ln}\lambda_{j}] + \sum_{i}\sum_{j}\sum_{p}\sum_{k} 	\boldsymbol{E}_{q}[X_{i,j,p}[C_{i,j}\textrm{ln} \psi^{(1)}_{p, k} + (1 - C_{i,j})\textrm{ln}\psi^{(0)}_{p, k}]]
+\end{equation}
+
+\begin{equation}
+=  \sum_{i} \sum_{j} \boldsymbol{E}_{q}[C_{i, j}] \textrm{ln}\lambda_{j} + \sum_{i}\sum_{j}\sum_{p}\sum_{k} 	\boldsymbol{E}_{q}X_{i,j,p}[C_{i,j}\textrm{ln} \psi^{(1)}_{p, k} + (1 - C_{i,j})\textrm{ln}\psi^{(0)}_{p, k}]
+\end{equation}
+
+\subsubsection{Derivitive with respect to $\lambda_{j}$}
+
+Constraint equation defines bounds of $\lambda_{j}$ that we must optimize $\boldsymbol{E}_{q}[\textrm{log} P(\boldsymbol{X}, \boldsymbol{C} | \boldsymbol{\theta})]$ within. $\lambda_{j}$ is probibility that a particular motif is the TFBS. There is only one TFBS per sequence so probibility over all possible motifs must sum to 1.
+
+\begin{equation}
+	g(\lambda_{j}) = \sum_{j} \lambda_{j} - 1
+\end{equation}
+
+
+\begin{equation}
+	h(\lambda_{j}) = \textrm{ELBO}(q_{t}(C), \boldsymbol{\theta}) + \phi g(\lambda_{j})
+\end{equation}
+
+\begin{equation}
+	\frac{\partial{h}}{\partial{\lambda_{j}}} = \frac{\sum_{i}{E}_{q}[C_{i, j}]}{\lambda_{j}} - \phi
+\end{equation}
+
+\begin{equation}
+\lambda_{j} = \frac{\sum_{i}{E}_{q}[C_{i, j}]}{\phi}
+\end{equation}
+
+Derivitive with respect to $\phi$ (lagrangian multiplier) is just the constraint equation.
+
+\begin{equation}
+	\frac{\partial{h}}{\partial{\phi}} = g(\lambda_{j})
+\end{equation}
+
+Set equal to zero and plug in value for $\lambda_{j}$.
+
+\begin{equation}
+	0 = \sum_{j}  \frac{\sum_{i}{E}_{q}[C_{i, j}]}{\phi} - 1
+\end{equation}
+
+\begin{equation}
+1 = \sum_{j}  \frac{\sum_{i}{E}_{q}[C_{i, j}]}{\phi}
+\end{equation}
+
+\begin{equation}
+\phi = \sum_{j}  \sum_{i}{E}_{q}[C_{i, j}]
+\end{equation}
+
+Plug back into $\lambda_{j} = \frac{\sum_{i}{E}_{q}[C_{i, j}]}{\phi}$.
+
+\begin{equation}
+	\lambda_{j} = \frac{\sum_{i}{E}_{q}[C_{i, j}]}{\sum_{j}  \sum_{i}{E}_{q}[C_{i, j}]}
+\end{equation}
+
+\subsection{Derivitive with respect to $\psi_{p, k}^{(C_{i, j})}$}
+
+Define constraint equation to optimize within. $\psi_{p, k}^{(C_{i, j})}$
+
+\begin{equation}
+	g(\psi_{p, k}^{(0)}, \psi_{p, k}^{(1}) = (1 - \sum_{p} \psi_{p, k}^0) + (1 - \sum_{p} \psi_{p, k}^1)
+\end{equation}
+
+\begin{equation}
+h(\psi_{p, k}^{(0)}, \psi_{p, k}^{(1)}) = \textrm{ELBO}(q_{t}(C), \boldsymbol{\theta}) + \phi g(\psi_{p, k}^{(0)}, \psi_{p, k}^{(1)})
+\end{equation}
+
+\begin{equation}
+\frac{\partial{h}}{\partial{\psi_{p, k}^{(C_{i, j})}}} = \sum_{i}\sum_{j} \frac{\boldsymbol{E}_{q}X_{i,j,p}[C_{i,j}}{\psi^{(1)}_{p, k}} + \frac{\boldsymbol{E}_{q}X_{i,j,p}[1 - C_{i,j}]}{\psi^{(0)}_{p, k}}
+\end{equation}
+
+
+
+\end{document}
