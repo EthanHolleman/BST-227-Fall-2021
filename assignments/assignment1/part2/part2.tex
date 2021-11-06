@@ -62,6 +62,7 @@
 
 \subsection{E step}
 
+$P(\boldsymbol{C} | \boldsymbol{X}, \boldsymbol{\theta})$ is effectively telling us for every motif for each sequence, was this motif likely to be a transcription factor binding site given all motifs and the parameters of the model. The probability of a motif being the transcription factor binding site is ultimately a function of the nucleotides that compose that motif and the position of those nucleotides within the motif.
 
 \begin{equation}
 	P(\boldsymbol{C} | \boldsymbol{X}, \boldsymbol{\theta}) = \frac{P(\boldsymbol{X}, \boldsymbol{C} | \boldsymbol{\theta})}{P(\boldsymbol{X} | \boldsymbol{\theta})}
@@ -71,27 +72,22 @@ Product individual posteriors is proportional to posterior over all latent varia
 
 \begin{equation}
 P(\boldsymbol{C} | \boldsymbol{X}, \boldsymbol{\theta}) \propto
- \prod_{i} \prod_{j} \prod_{p}P(C_{i, j} | X_{i, j, p}, \boldsymbol{\theta})
-\end{equation}
-
-Compute individual posteriors.
-
-\begin{equation}
-	P(C_{i, j} | X_{i, j, p}) = \frac{P(X_{i,j,p} | C_{i,j}, \boldsymbol{\theta}) P(X_{i, j} | \boldsymbol{\theta})}{P(X_{i,j,p} | \boldsymbol{\theta})}
-\end{equation}
-
-$P(E, F | G) = P(E | F, G) P(F | G)$
-
-\begin{equation}
-P(C_{i, j} | X_{i, j, p}) = \frac{P(X_{i,j,p}, C_{i, j} | \boldsymbol{\theta})}{P(X_{i,j,p} | \boldsymbol{\theta})}
+ \prod_{i} \prod_{j} P( X_{i, j}, C_{i} | \boldsymbol{\theta})
 \end{equation}
 
 \begin{equation}
-P(C_{i, j} | X_{i, j, p}) = \frac{ \sum_{p} \sum_{k} P(C_{i, j} = 1 | \boldsymbol{\theta})P(X_{i, j, p} = k | C_{i, j}, \boldsymbol{\theta})}{P(X_{i,j,p} | \boldsymbol{\theta})}
+P( X_{i, j}, C_{i} | \boldsymbol{\theta}) = \prod_{p}\prod_{k}[P(X_{i,j,p=k} | C_{i}=j, \boldsymbol{\theta})^{C_{i,j}}P(X_{i,j,p=k} | C_{i}\neq j, \boldsymbol{\theta})^{1-C_{i,j}}]^{X_{i,j,p,k}}
 \end{equation}
 
-How to rewrite $P(X_{i,j,p} | \boldsymbol{\theta})$ and does the numerator make any sense at all?
 
+\begin{equation}
+	P(X_{i,j} | \boldsymbol{\theta}) = \prod_{j} \lambda_{j} \psi_{p, k}^{(0)} + \prod_{j} \lambda_{j} \psi_{p, k}^{(1)}
+\end{equation}
+ 
+
+\begin{equation}
+P(\boldsymbol{C} | \boldsymbol{X}, \boldsymbol{\theta}) = \frac{\prod_{p}\prod_{k}[P(X_{i,j,p=k} | C_{i}=j, \boldsymbol{\theta})^{C_{i,j}}P(X_{i,j,p=k} | C_{i}\neq j, \boldsymbol{\theta})^{1-C_{i,j}}]^{X_{i,j,p,k}}}{\prod_{j} \lambda_{j} \psi_{p, k}^{(0)} + \prod_{j} \lambda_{j} \psi_{p, k}^{(1)}}
+\end{equation}
 
 \subsection{M step}
 
@@ -107,9 +103,9 @@ How to rewrite $P(X_{i,j,p} | \boldsymbol{\theta})$ and does the numerator make 
 =  \sum_{i} \sum_{j} \boldsymbol{E}_{q}[C_{i, j}] \textrm{ln}\lambda_{j} + \sum_{i}\sum_{j}\sum_{p}\sum_{k} 	\boldsymbol{E}_{q}X_{i,j,p}[C_{i,j}\textrm{ln} \psi^{(1)}_{p, k} + (1 - C_{i,j})\textrm{ln}\psi^{(0)}_{p, k}]
 \end{equation}
 
-\subsubsection{Derivitive with respect to $\lambda_{j}$}
+\subsubsection{Derivative with respect to $\lambda_{j}$}
 
-Constraint equation defines bounds of $\lambda_{j}$ that we must optimize $\boldsymbol{E}_{q}[\textrm{log} P(\boldsymbol{X}, \boldsymbol{C} | \boldsymbol{\theta})]$ within. $\lambda_{j}$ is probibility that a particular motif is the TFBS. There is only one TFBS per sequence so probibility over all possible motifs must sum to 1.
+Constraint equation defines bounds of $\lambda_{j}$ that we must optimize $\boldsymbol{E}_{q}[\textrm{log} P(\boldsymbol{X}, \boldsymbol{C} | \boldsymbol{\theta})]$ within. $\lambda_{j}$ is probability that a particular motif is the TFBS. There is only one TFBS per sequence so probability over all possible motifs must sum to 1.
 
 \begin{equation}
 	g(\lambda_{j}) = \sum_{j} \lambda_{j} - 1
@@ -128,7 +124,7 @@ Constraint equation defines bounds of $\lambda_{j}$ that we must optimize $\bold
 \lambda_{j} = \frac{\sum_{i}{E}_{q}[C_{i, j}]}{\phi}
 \end{equation}
 
-Derivitive with respect to $\phi$ (lagrangian multiplier) is just the constraint equation.
+Derivative with respect to $\phi$ (Lagrangian multiplier) is just the constraint equation.
 
 \begin{equation}
 	\frac{\partial{h}}{\partial{\phi}} = g(\lambda_{j})
@@ -137,39 +133,101 @@ Derivitive with respect to $\phi$ (lagrangian multiplier) is just the constraint
 Set equal to zero and plug in value for $\lambda_{j}$.
 
 \begin{equation}
-	0 = \sum_{j}  \frac{\sum_{i}{E}_{q}[C_{i, j}]}{\phi} - 1
+	0 = \frac{\sum_{i}\sum_{j} {E}_{q}[C_{i, j}]}{\phi} - 1
 \end{equation}
 
 \begin{equation}
-1 = \sum_{j}  \frac{\sum_{i}{E}_{q}[C_{i, j}]}{\phi}
+1 =  \frac{\sum_{i}\sum_{j}{E}_{q}[C_{i, j}]}{\phi}
 \end{equation}
 
 \begin{equation}
-\phi = \sum_{j}  \sum_{i}{E}_{q}[C_{i, j}]
+\phi = \sum_{i}  \sum_{j}{E}_{q}[C_{i, j}]
 \end{equation}
 
 Plug back into $\lambda_{j} = \frac{\sum_{i}{E}_{q}[C_{i, j}]}{\phi}$.
 
 \begin{equation}
-	\lambda_{j} = \frac{\sum_{i}{E}_{q}[C_{i, j}]}{\sum_{j}  \sum_{i}{E}_{q}[C_{i, j}]}
+	\lambda_{j} = \frac{\sum_{i}{E}_{q}[C_{i, j}]}{\sum_{i}  \sum_{j}{E}_{q}[C_{i, j}]}
 \end{equation}
 
-\subsection{Derivitive with respect to $\psi_{p, k}^{(C_{i, j})}$}
+\subsection{Derivative with respect to $\psi_{p, k}^{(0)}$}
+
+Define constraint equation to optimize $\psi_{p, k}^{(C_{i, j})}$ within.
+
+\begin{equation}
+	g(\psi_{p, k}^{(0)}) = \sum_{k}\psi_{p, k}^{(0)} - 1 
+\end{equation}
+
+\begin{equation}
+h(\psi_{p, k}^{(0)}) = \textrm{ELBO}(q_{t}(C), \boldsymbol{\theta}) + \phi g(\psi_{p, k}^{(0)})
+\end{equation}
+
+\begin{equation}
+\frac{\partial{h}}{\partial{\psi_{p, k}^{(0)}}} = \frac{\sum_{i}\sum_{j}E_{q} X_{i,j,p,k} C_{i,j}}{\psi_{p, k}^{(0)}} - \phi
+\end{equation}
+
+Set derivative equal to zero and solve for $\psi_{p, k}^{(0)}$.
+
+\begin{equation}
+	\phi \psi_{p, k}^{(0)} = \sum_{i}\sum_{j}E_{q} X_{i,j,p,k} C_{i,j}
+\end{equation}
+
+\begin{equation}
+\psi_{p, k}^{(0)} = \frac{\sum_{i}\sum_{j}E_{q} X_{i,j,p,k} C_{i,j}}{\phi}
+\end{equation}
+
+Take derivative of $h(\psi_{p, k}^{(0)})$ with respect to $\phi$.
+
+\begin{equation}
+\frac{\partial{h}}{\partial{\phi}} = \sum_{k}\psi_{p, k}^{(0)} - 1
+\end{equation}
+
+\begin{equation}
+=\frac{\sum_{k}\sum_{i}\sum_{j}E_{q} X_{i,j,p,k} C_{i,j}}{\phi} - 1
+\end{equation}
+
+\begin{equation}
+	\phi = \sum_{k}\sum_{i}\sum_{j}E_{q} X_{i,j,p,k} C_{i,j}
+\end{equation}
+
+\begin{equation}
+\psi_{p, k}^{(0)} = \frac{\sum_{i}\sum_{j}E_{q} X_{i,j,p,k} C_{i,j}}{\sum_{k}\sum_{i}\sum_{j}E_{q} X_{i,j,p,k} C_{i,j}}
+\end{equation}
+
+
+\subsection{Derivative with respect to $\psi_{p, k}^{(0)}$}
 
 Define constraint equation to optimize within. $\psi_{p, k}^{(C_{i, j})}$
 
 \begin{equation}
-	g(\psi_{p, k}^{(0)}, \psi_{p, k}^{(1}) = (1 - \sum_{p} \psi_{p, k}^0) + (1 - \sum_{p} \psi_{p, k}^1)
+g(\psi_{p, k}^{(1)}) = \sum_{k}\psi_{p, k}^{(1)} - 1
 \end{equation}
 
 \begin{equation}
-h(\psi_{p, k}^{(0)}, \psi_{p, k}^{(1)}) = \textrm{ELBO}(q_{t}(C), \boldsymbol{\theta}) + \phi g(\psi_{p, k}^{(0)}, \psi_{p, k}^{(1)})
+h(\psi_{p, k}^{(1)}) = \textrm{ELBO}(q_{t}(C), \boldsymbol{\theta}) + \phi g(\psi_{p, k}^{(1)})
 \end{equation}
 
 \begin{equation}
-\frac{\partial{h}}{\partial{\psi_{p, k}^{(C_{i, j})}}} = \sum_{i}\sum_{j} \frac{\boldsymbol{E}_{q}X_{i,j,p}[C_{i,j}}{\psi^{(1)}_{p, k}} + \frac{\boldsymbol{E}_{q}X_{i,j,p}[1 - C_{i,j}]}{\psi^{(0)}_{p, k}}
+\frac{\partial{h}}{\partial{\psi_{p, k}^{(1)}}} = \frac{\sum_{i}\sum_{j}E_{q} X_{i,j,p,k} (1 - C_{i,j})}{\psi_{p, k}^{(1)}} - \phi
 \end{equation}
 
+\begin{equation}
+\psi_{p, k}^{(1)} = \frac{\sum_{i}\sum_{j}E_{q} X_{i,j,p,k} (1 - C_{i,j})}{\phi}
+\end{equation}
+
+\begin{equation}
+\frac{\partial{h}}{\partial{\phi}} = \sum_{k}\psi_{p, k}^{(1)} - 1
+\end{equation}
+
+\begin{equation}
+= \frac{\sum_{k} \sum_{i}\sum_{j}E_{q} X_{i,j,p,k} (1 - C_{i,j})}{\phi} - 1
+\end{equation}
+
+
+
+\begin{equation}
+\psi_{p, k}^{(1)} = \frac{\sum_{i}\sum_{j}E_{q} X_{i,j,p,k} (1 - C_{i,j})}{\sum_{k} \sum_{i}\sum_{j}E_{q} X_{i,j,p,k} (1 - C_{i,j})}
+\end{equation}
 
 
 \end{document}
